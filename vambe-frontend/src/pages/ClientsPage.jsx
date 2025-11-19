@@ -14,6 +14,7 @@ export default function ClientsPage() {
   const filtroVendedor = searchParams.get("vendedor") || "";
   const filtroUrgencia = searchParams.get("urgencia") || "";
   const filtroCanal = searchParams.get("canal") || "";
+  const filtroDolor = searchParams.get("dolor") || "";
 
   useEffect(() => {
     async function load() {
@@ -53,11 +54,24 @@ export default function ClientsPage() {
     [clients]
   );
 
+  const dolores = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          clients
+            .map((c) => c.category?.main_pain)
+            .filter(Boolean)
+        )
+      ),
+    [clients]
+  );
+
   function actualizarFiltros({
     industria = filtroIndustria,
     vendedor = filtroVendedor,
     urgencia = filtroUrgencia,
     canal = filtroCanal,
+    dolor = filtroDolor,
   }) {
     navigate(
       `/clientes?industria=${encodeURIComponent(
@@ -66,7 +80,9 @@ export default function ClientsPage() {
         vendedor
       )}&urgencia=${encodeURIComponent(
         urgencia
-      )}&canal=${encodeURIComponent(canal)}`
+      )}&canal=${encodeURIComponent(
+        canal
+      )}&dolor=${encodeURIComponent(dolor)}`
     );
   }
 
@@ -80,9 +96,17 @@ export default function ClientsPage() {
           return false;
         if (filtroCanal && c.category?.origin_channel !== filtroCanal)
           return false;
+        if (filtroDolor && c.category?.main_pain !== filtroDolor) return false;
         return true;
       }),
-    [clients, filtroIndustria, filtroVendedor, filtroUrgencia, filtroCanal]
+    [
+      clients,
+      filtroIndustria,
+      filtroVendedor,
+      filtroUrgencia,
+      filtroCanal,
+      filtroDolor,
+    ]
   );
 
   const handleRowClick = (id) => {
@@ -96,19 +120,11 @@ export default function ClientsPage() {
       <section className="section">
         <h2 className="section-title">Listado de oportunidades</h2>
         <p className="section-description">
-          Filtra por industria, vendedor, urgencia y canal de origen para
-          encontrar rápidamente las oportunidades relevantes.
+          Filtra por industria, vendedor, urgencia, canal de origen y dolor
+          principal para encontrar rápidamente las oportunidades relevantes.
         </p>
 
-        {/* Filtros */}
-        <div
-          style={{
-            display: "flex",
-            gap: "0.75rem",
-            marginBottom: "1rem",
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="filters-bar">
           <select
             value={filtroIndustria}
             onChange={(e) =>
@@ -162,9 +178,22 @@ export default function ClientsPage() {
               </option>
             ))}
           </select>
+
+          <select
+            value={filtroDolor}
+            onChange={(e) =>
+              actualizarFiltros({ dolor: e.target.value })
+            }
+          >
+            <option value="">Todos los dolores</option>
+            {dolores.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Tabla */}
         <div className="table-wrapper">
           <table className="table">
             <thead>

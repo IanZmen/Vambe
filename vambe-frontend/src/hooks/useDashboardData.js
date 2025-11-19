@@ -1,167 +1,258 @@
-function computeKpis(clients, withCategory) {
-  const totalOportunidades = clients.length;
-  const conCategoria = withCategory.length;
 
-  const altaUrgencia = withCategory.filter(c => c.category.urgency === "Alta").length;
-  const altoInteres = withCategory.filter(c => c.category.interest_level === "Alto").length;
-
-  return {
-    totalOportunidades,
-    oportunidadesConCategoria: conCategoria,
-    altaUrgencia,
-    altoInteres,
-  };
-}
-
-function computeIndustriesSummary(withCategory) {
-  const map = new Map();
-
-  for (const c of withCategory) {
-    const ind = c.category.industry || "Sin industria";
-    if (!map.has(ind)) {
-      map.set(ind, {
-        industry: ind,
-        count: 0,
-        altaUrgencia: 0,
-        altoInteres: 0,
-        grande: 0,
-        requiereIntegracion: 0,
-        volumeSum: 0,
-        volumeCount: 0,
-      });
-    }
-    const v = map.get(ind);
-    v.count += 1;
-    if (c.category.urgency === "Alta") v.altaUrgencia += 1;
-    if (c.category.interest_level === "Alto") v.altoInteres += 1;
-    if (c.category.monetary_opportunity === "Grande") v.grande += 1;
-
-    const reqInt = (c.category.requires_integration || "").toLowerCase();
-    if (reqInt === "si" || reqInt === "sí") v.requiereIntegracion += 1;
-
-    if (c.category.weekly_volume != null) {
-      v.volumeSum += c.category.weekly_volume;
-      v.volumeCount += 1;
-    }
-  }
-
-  return Array.from(map.values()).map(v => ({
-    industry: v.industry,
-    cantidad: v.count,
-    pctAltaUrgencia: v.count ? Math.round((v.altaUrgencia / v.count) * 100) : 0,
-    pctAltoInteres: v.count ? Math.round((v.altoInteres / v.count) * 100) : 0,
-    pctOportunidadGrande: v.count ? Math.round((v.grande / v.count) * 100) : 0,
-    pctRequiereIntegracion: v.count ? Math.round((v.requiereIntegracion / v.count) * 100) : 0,
-    volumenPromedio: v.volumeCount ? Math.round(v.volumeSum / v.volumeCount) : null,
-  }));
-}
-
-function computeOriginSummary(withCategory) {
-  const map = new Map();
-
-  for (const c of withCategory) {
-    const canal = c.category.origin_channel || "Sin canal";
-    if (!map.has(canal)) {
-      map.set(canal, {
-        origin_channel: canal,
-        count: 0,
-        altaUrgencia: 0,
-        altoInteres: 0,
-        grande: 0,
-      });
-    }
-    const v = map.get(canal);
-    v.count += 1;
-    if (c.category.urgency === "Alta") v.altaUrgencia += 1;
-    if (c.category.interest_level === "Alto") v.altoInteres += 1;
-    if (c.category.monetary_opportunity === "Grande") v.grande += 1;
-  }
-
-  return Array.from(map.values()).map(v => ({
-    origin_channel: v.origin_channel,
-    cantidad: v.count,
-    pctAltaUrgencia: v.count ? Math.round((v.altaUrgencia / v.count) * 100) : 0,
-    pctAltoInteres: v.count ? Math.round((v.altoInteres / v.count) * 100) : 0,
-    pctOportunidadGrande: v.count ? Math.round((v.grande / v.count) * 100) : 0,
-  }));
-}
-
-function computePriorityList(withCategory) {
-  return withCategory.map(c => {
-    const { category } = c;
-
-    const urgScore = category.urgency === "Alta" ? 3 : category.urgency === "Media" ? 2 : 1;
-    const intScore = category.interest_level === "Alto" ? 3 : category.interest_level === "Medio" ? 2 : 1;
-    const oppScore = category.monetary_opportunity === "Grande"
-      ? 3
-      : category.monetary_opportunity === "Mediana"
-      ? 2
-      : 1;
-
-    let score = urgScore + intScore + oppScore;
-    if ((category.weekly_volume || 0) >= 500) score += 1;
-
-    return {
-      id: c.id,
-      nombre: c.name,
-      vendedor: c.seller,
-      industria: category.industry,
-      casoUso: category.use_case,
-      canalOrigen: category.origin_channel,
-      disparadorCompra: category.purchase_trigger,
-      dolorPrincipal: category.main_pain,
-      urgencia: category.urgency,
-      interes: category.interest_level,
-      etapaVenta: category.sales_stage,
-      oportunidad: category.monetary_opportunity,
-      volumenSemanal: category.weekly_volume,
-      requiereIntegracion: category.requires_integration,
-      complejidad: category.complexity,
-      cerrado: c.closed,
-      score,
-    };
-  }).sort((a, b) => b.score - a.score);
-}
-
-function computeSellerStats(withCategory) {
-  const map = new Map();
-
-  for (const c of withCategory) {
-    const seller = c.seller || "Sin vendedor";
-    if (!map.has(seller)) {
-      map.set(seller, {
-        seller,
-        total: 0,
-        cerrados: 0,
-        altaCalidad: 0,
-      });
-    }
-    const v = map.get(seller);
-    v.total += 1;
-    if (c.closed) v.cerrados += 1;
-
-    const urgAlta = c.category.urgency === "Alta";
-    const intAlto = c.category.interest_level === "Alto";
-    if (urgAlta && intAlto) v.altaCalidad += 1;
-  }
-
-  return Array.from(map.values()).map(v => ({
-    vendedor: v.seller,
-    oportunidades: v.total,
-    cerradas: v.cerrados,
-    tasaCierre: v.total ? Math.round((v.cerrados / v.total) * 100) : 0,
-    oportunidadesAltaCalidad: v.altaCalidad,
-  }));
-}
+import { useMemo } from "react";
 
 export function useDashboardData(clients) {
-  const withCategory = clients.filter(c => c.category);
+  const kpis = useMemo(() => {
+    const total = clients.length;
+    const conCategoria = clients.filter((c) => c.category).length;
+    const altaUrgencia = clients.filter(
+      (c) => c.category?.urgency === "Alta"
+    ).length;
+    const altoInteres = clients.filter(
+      (c) => c.category?.interest_level === "Alto"
+    ).length;
 
-  const kpis = computeKpis(clients, withCategory);
-  const industriesSummary = computeIndustriesSummary(withCategory);
-  const originSummary = computeOriginSummary(withCategory);
-  const priorityList = computePriorityList(withCategory);
-  const sellerStats = computeSellerStats(withCategory);
+    return {
+      totalOportunidades: total,
+      oportunidadesConCategoria: conCategoria,
+      altaUrgencia,
+      altoInteres,
+    };
+  }, [clients]);
+
+  const industriesSummary = useMemo(() => {
+    const map = new Map();
+
+    for (const c of clients) {
+      const cat = c.category;
+      if (!cat || !cat.industry) continue;
+
+      const key = cat.industry;
+      if (!map.has(key)) {
+        map.set(key, {
+          industry: key,
+          cantidad: 0,
+          altaUrgencia: 0,
+          altoInteres: 0,
+          oportunidadGrande: 0,
+          requiereIntegracion: 0,
+          volumenTotal: 0,
+          volumenCount: 0,
+        });
+      }
+
+      const item = map.get(key);
+      item.cantidad += 1;
+
+      if (cat.urgency === "Alta") item.altaUrgencia += 1;
+      if (cat.interest_level === "Alto") item.altoInteres += 1;
+      if (cat.monetary_opportunity === "Grande")
+        item.oportunidadGrande += 1;
+      if (cat.requires_integration === "Sí" || cat.requires_integration === "Si")
+        item.requiereIntegracion += 1;
+
+      if (typeof cat.weekly_volume === "number") {
+        item.volumenTotal += cat.weekly_volume;
+        item.volumenCount += 1;
+      }
+    }
+
+    return Array.from(map.values()).map((item) => ({
+      industry: item.industry,
+      cantidad: item.cantidad,
+      pctAltaUrgencia: item.cantidad
+        ? Math.round((item.altaUrgencia / item.cantidad) * 100)
+        : 0,
+      pctAltoInteres: item.cantidad
+        ? Math.round((item.altoInteres / item.cantidad) * 100)
+        : 0,
+      pctOportunidadGrande: item.cantidad
+        ? Math.round((item.oportunidadGrande / item.cantidad) * 100)
+        : 0,
+      pctRequiereIntegracion: item.cantidad
+        ? Math.round((item.requiereIntegracion / item.cantidad) * 100)
+        : 0,
+      volumenPromedio: item.volumenCount
+        ? Math.round(item.volumenTotal / item.volumenCount)
+        : null,
+    }));
+  }, [clients]);
+
+  const originSummary = useMemo(() => {
+    const map = new Map();
+
+    for (const c of clients) {
+      const cat = c.category;
+      if (!cat || !cat.origin_channel) continue;
+
+      const key = cat.origin_channel;
+      if (!map.has(key)) {
+        map.set(key, {
+          origin_channel: key,
+          cantidad: 0,
+          altaUrgencia: 0,
+          altoInteres: 0,
+          oportunidadGrande: 0,
+        });
+      }
+
+      const item = map.get(key);
+      item.cantidad += 1;
+      if (cat.urgency === "Alta") item.altaUrgencia += 1;
+      if (cat.interest_level === "Alto") item.altoInteres += 1;
+      if (cat.monetary_opportunity === "Grande")
+        item.oportunidadGrande += 1;
+    }
+
+    return Array.from(map.values()).map((item) => ({
+      origin_channel: item.origin_channel,
+      cantidad: item.cantidad,
+      pctAltaUrgencia: item.cantidad
+        ? Math.round((item.altaUrgencia / item.cantidad) * 100)
+        : 0,
+      pctAltoInteres: item.cantidad
+        ? Math.round((item.altoInteres / item.cantidad) * 100)
+        : 0,
+      pctOportunidadGrande: item.cantidad
+        ? Math.round((item.oportunidadGrande / item.cantidad) * 100)
+        : 0,
+    }));
+  }, [clients]);
+
+  const priorityList = useMemo(() => {
+    return clients
+      .filter((c) => c.category)
+      .map((c) => {
+        const cat = c.category;
+        let score = 0;
+
+        if (cat.urgency === "Alta") score += 40;
+        if (cat.urgency === "Media") score += 20;
+
+        if (cat.interest_level === "Alto") score += 30;
+        if (cat.monetary_opportunity === "Grande") score += 30;
+
+        if (typeof cat.weekly_volume === "number") {
+          score += Math.min(cat.weekly_volume / 50, 20);
+        }
+
+        return {
+          id: c.id,
+          score: Math.round(score),
+          nombre: c.name,
+          industria: cat.industry,
+          casoUso: cat.use_case,
+          canalOrigen: cat.origin_channel,
+          urgencia: cat.urgency,
+          interes: cat.interest_level,
+          oportunidad: cat.monetary_opportunity,
+        };
+      })
+      .sort((a, b) => b.score - a.score);
+  }, [clients]);
+
+  const sellerStats = useMemo(() => {
+    const map = new Map();
+
+    for (const c of clients) {
+      if (!c.seller) continue;
+      const key = c.seller;
+
+      if (!map.has(key)) {
+        map.set(key, {
+          vendedor: key,
+          oportunidades: 0,
+          cerradas: 0,
+          oportunidadesAltaCalidad: 0,
+        });
+      }
+
+      const item = map.get(key);
+      item.oportunidades += 1;
+      if (c.closed) item.cerradas += 1;
+
+      const cat = c.category;
+      if (
+        cat &&
+        cat.urgency === "Alta" &&
+        cat.interest_level === "Alto" &&
+        cat.monetary_opportunity === "Grande"
+      ) {
+        item.oportunidadesAltaCalidad += 1;
+      }
+    }
+
+    return Array.from(map.values()).map((item) => ({
+      ...item,
+      tasaCierre: item.oportunidades
+        ? Math.round((item.cerradas / item.oportunidades) * 100)
+        : 0,
+    }));
+  }, [clients]);
+
+  const painsSummary = useMemo(() => {
+    const map = new Map();
+
+    for (const c of clients) {
+      const cat = c.category;
+      if (!cat || !cat.main_pain) continue;
+
+      const key = cat.main_pain;
+      if (!map.has(key)) {
+        map.set(key, {
+          pain: key,
+          count: 0,
+          volumenTotal: 0,
+          volumenCount: 0,
+          industrias: {},
+        });
+      }
+
+      const item = map.get(key);
+      item.count += 1;
+
+      if (typeof cat.weekly_volume === "number") {
+        item.volumenTotal += cat.weekly_volume;
+        item.volumenCount += 1;
+      }
+
+      if (cat.industry) {
+        item.industrias[cat.industry] =
+          (item.industrias[cat.industry] || 0) + 1;
+      }
+    }
+
+    return Array.from(map.values()).map((item) => {
+      const mainIndustry =
+        Object.entries(item.industrias).sort((a, b) => b[1] - a[1])[0]?.[0] ??
+        "N/A";
+
+      return {
+        pain: item.pain,
+        count: item.count,
+        mainIndustry,
+        avgVolume: item.volumenCount
+          ? Math.round(item.volumenTotal / item.volumenCount)
+          : null,
+      };
+    });
+  }, [clients]);
+
+  const complexityRows = useMemo(() => {
+    return clients
+      .filter((c) => c.category)
+      .map((c) => {
+        const cat = c.category;
+        return {
+          id: c.id,
+          name: c.name,
+          industry: cat.industry,
+          complexity: cat.complexity || "N/A",
+          monetary: cat.monetary_opportunity,
+          integration: cat.requires_integration,
+        };
+      });
+  }, [clients]);
 
   return {
     kpis,
@@ -169,5 +260,7 @@ export function useDashboardData(clients) {
     originSummary,
     priorityList,
     sellerStats,
+    painsSummary,
+    complexityRows,
   };
 }

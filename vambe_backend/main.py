@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from vambe_backend.db import Base, engine
 from vambe_backend.api import health, clients, categories
 from vambe_backend.seed import seed_database
+from vambe_backend.config import get_cors_origins
 
 import logging
 
@@ -13,9 +16,11 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Vambe Client Categorization API")
 
+origins = get_cors_origins()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
