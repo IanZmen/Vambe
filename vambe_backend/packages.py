@@ -7,7 +7,6 @@ REQUIRED_PACKAGES = [
     "sqlalchemy",
     "pydantic[email]",
     "email-validator",
-    "groc",
 ]
 
 def install(package: str):
