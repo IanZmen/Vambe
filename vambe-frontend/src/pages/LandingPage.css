@@ -1,0 +1,31 @@
+.landing-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.landing-title {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+
+.landing-description {
+  font-size: 1rem;
+  color: #4b5563;
+}
+
+.landing-list {
+  margin-top: 1rem;
+  padding-left: 1.25rem;
+  color: #374151;
+}
+
+.landing-button {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.2rem;
+  background: #2563eb;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}

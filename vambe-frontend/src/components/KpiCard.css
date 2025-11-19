@@ -1,0 +1,17 @@
+.kpi-card {
+  background: white;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.kpi-label {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.kpi-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-top: 4px;
+}

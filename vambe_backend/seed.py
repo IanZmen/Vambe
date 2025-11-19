@@ -1,4 +1,3 @@
-import csv
 import json
 from sqlalchemy.orm import Session
 from datetime import datetime

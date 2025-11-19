@@ -22,6 +22,7 @@ def list_clients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
 def get_all_clients_with_category(db: Session = Depends(get_db)):
     return db.query(models.Client).all()
 
+
 @router.get("/{client_id}", response_model=schemas.Client)
 def get_client(client_id: int, db: Session = Depends(get_db)):
     client = db.query(models.Client).filter(models.Client.id == client_id).first()
