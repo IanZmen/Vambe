@@ -22,19 +22,28 @@ class Client(ClientBase):
 
 class ClientCategoryBase(BaseModel):
     industry: str
-    company_size: str
+    use_case: str
     main_pain: str
-    contact_volume_level: str
-    contact_volume_numeric: Optional[int]
-    has_peaks: bool
-    peak_context: Optional[str]
-    discovery_channel: str
-    main_value_perceived: str
-    urgency_level: str
-    deal_stage_inferred: str
+    weekly_volume: Optional[int] = None
+    origin_channel: str
+    purchase_trigger: str
+    urgency: str
+    interest_level: str
+    sales_stage: str
+    monetary_opportunity: str
+    requires_integration: str
+    complexity: str
 
 class ClientCategory(ClientCategoryBase):
     id: int
     client_id: int
     class Config:
         from_attributes = True
+
+
+class ClientFull(Client):
+    category: Optional[ClientCategory] = None
+
+    class Config:
+        from_attributes = True
+
