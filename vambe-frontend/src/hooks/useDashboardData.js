@@ -254,6 +254,51 @@ export function useDashboardData(clients) {
       });
   }, [clients]);
 
+
+   const sellerIndustryStats = useMemo(() => {
+    const stats = {};
+
+    for (const c of clients) {
+      const seller = c.seller;
+      const cat = c.category;
+      if (!seller || !cat || !cat.industry) continue;
+
+      if (!stats[seller]) {
+        stats[seller] = {
+          seller,
+          totalOpps: 0,
+          byIndustry: {},
+        };
+      }
+
+      const sellerStats = stats[seller];
+      sellerStats.totalOpps += 1;
+
+      if (!sellerStats.byIndustry[cat.industry]) {
+        sellerStats.byIndustry[cat.industry] = {
+          industry: cat.industry,
+          oportunidades: 0,
+          cerradas: 0,
+          altaCalidad: 0,
+        };
+      }
+
+      const indStats = sellerStats.byIndustry[cat.industry];
+      indStats.oportunidades += 1;
+      if (c.closed) indStats.cerradas += 1;
+
+      if (
+        cat.urgency === "Alta" &&
+        cat.interest_level === "Alto" &&
+        cat.monetary_opportunity === "Grande"
+      ) {
+        indStats.altaCalidad += 1;
+      }
+    }
+
+    return stats;
+  }, [clients]);
+
   return {
     kpis,
     industriesSummary,
@@ -262,5 +307,6 @@ export function useDashboardData(clients) {
     sellerStats,
     painsSummary,
     complexityRows,
+    sellerIndustryStats,
   };
 }

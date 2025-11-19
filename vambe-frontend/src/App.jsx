@@ -3,6 +3,7 @@ import LandingPage from "./pages/LandingPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import ClientsPage from "./pages/ClientsPage.jsx";
 import ClientDetailPage from "./pages/ClientDetailPage.jsx";
+import UploadCsvPage from "./pages/UploadCsvPage";
 
 import "./App.css";
 
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/clientes" element={<ClientsPage />} />
           <Route path="/clientes/:id" element={<ClientDetailPage />} />
+          <Route path="/upload" element={<UploadCsvPage />} />
         </Routes>
       </main>
     </div>

@@ -7,7 +7,6 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from vambe_backend.db import Base, engine
 from vambe_backend.api import health, clients, categories
-from vambe_backend.seed import seed_database
 from vambe_backend.config import get_cors_origins
 
 import logging
@@ -29,8 +28,6 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
-    seed_database()
-
 
 app.include_router(health.router)
 app.include_router(clients.router)

@@ -1,0 +1,48 @@
+.chart-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.seller-chart-svg {
+  width: 100%;
+  height: auto;
+}
+
+.seller-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.seller-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.seller-chip input {
+  cursor: pointer;
+}
+
+.seller-filters-hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.bar-label text {
+  font-size: 0.65rem;
+  font-weight: 600;
+  fill: #ffffff;
+}
+
+.bar-label circle {
+  filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.25));
+}

@@ -1,9 +1,12 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy.orm import Session
 
 from vambe_backend import models, schemas
 from vambe_backend.dependencies import get_db
+from vambe_backend.services.client_importer import (
+    import_clients_from_csv_bytes,
+)
 
 import logging
 
@@ -11,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 
-
+IMPORT_KEY = "soyIan"
 
 @router.get("/", response_model=List[schemas.Client])
 def list_clients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
@@ -43,3 +46,15 @@ def get_client_category(client_id: int, db: Session = Depends(get_db)):
     return client.category
 
 
+@router.post("/import_csv")
+async def import_clients_from_csv(
+    file: UploadFile = File(...),
+    key: str = Query(..., description="Clave de seguridad"),
+    db: Session = Depends(get_db),
+):
+    if key != IMPORT_KEY:
+        raise HTTPException(status_code=403, detail="Clave inválida")
+
+    content_bytes = await file.read()
+    stats = import_clients_from_csv_bytes(content_bytes, db)
+    return stats

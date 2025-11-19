@@ -11,6 +11,8 @@ import TopPainsTable from "../components/tables/TopPainsTable";
 import ComplexityValueTable from "../components/tables/ComplexityValueTable";
 
 import ChannelQualityChart from "../components/ChannelQualityChart";
+import SellerComparisonChart from "../components/SellerComparisonChart";
+import IndustryOpportunityQuadrant from "../components/IndustryOpportunityQuadrant";
 
 import "../styles/page-base.css";
 import "../styles/table.css";
@@ -37,15 +39,20 @@ export default function DashboardPage() {
     sellerStats,
     painsSummary,
     complexityRows,
+    sellerIndustryStats,
   } = useDashboardData(clients);
 
   if (loading) return <p>Cargando panel...</p>;
 
   return (
-    <div className="page-container">
-      {/* KPIs */}
-      <section className="section">
-        <h2 className="section-title">Resumen general</h2>
+    <div className="page-container dashboard-page">
+      <section className="section section-heading">
+        <div>
+          <h2 className="section-title">Resumen general</h2>
+          <p className="section-description">
+            KPIs en tiempo real y, justo debajo, la comparativa de vendedores por industria para priorizar.
+          </p>
+        </div>
         <div className="kpi-grid">
           <KpiCard label="Oportunidades totales" value={kpis.totalOportunidades} />
           <KpiCard label="Con categorías" value={kpis.oportunidadesConCategoria} />
@@ -54,12 +61,14 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      <SellerComparisonChart clients={clients} />
+      <SellerPerformanceTable rows={sellerStats} />
+      <IndustryOpportunityQuadrant rows={industriesSummary} />
       <IndustryQualityTable rows={industriesSummary} />
       <RankingTable rows={priorityList} />
-      <SellerPerformanceTable rows={sellerStats} />
+
       <OriginQualityTable rows={originSummary} />
       <ChannelQualityChart data={originSummary} />
-
       <TopPainsTable pains={painsSummary} />
       <ComplexityValueTable rows={complexityRows} />
     </div>
