@@ -7,7 +7,8 @@ REQUIRED_PACKAGES = [
     "sqlalchemy",
     "pydantic[email]",
     "email-validator",
-    "groq"
+    "groq",
+    "python-multipart"
 ]
 
 def install(package: str):
