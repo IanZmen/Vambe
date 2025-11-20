@@ -6,7 +6,7 @@ const panels = [
   {
     title: "Comparar vendedores por industria",
     description:
-      "Visualiza de inmediato qué vendedor domina cada industria y su tasa de cierre para reforzar la estrategia.",
+      "Visualiza qué vendedor domina cada industria y su tasa de cierre para reforzar la estrategia.",
     tag: "Industria",
   },
   {
