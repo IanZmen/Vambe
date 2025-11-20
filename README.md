@@ -1,7 +1,7 @@
 # Vambe
 
 ## Descripcion general del desafio
-Vambe es una aplicación full-stack que procesa transcripciones de reuniones comerciales y utiliza un modelo de lenguaje (LLM) para generar categorías automáticas de cada cliente.
+Vambe es una aplicación que procesa transcripciones de reuniones comerciales y utiliza un modelo de lenguaje (LLM) para generar categorías automáticas de cada cliente.
 A partir de estas categorías, el sistema construye un panel interactivo que permite:
 
 - Priorizar oportunidades
@@ -107,7 +107,7 @@ notebooks: contiene el analisis exploratorio inicial
 scripts: contiene el procesamiento con LLM
 
 ## Backend
-El backend usa FastAPI y expone rutas para obtener clientes con categorias, metricas y detalles individuales. Se debe crear un archivo .env con un origen permitido para CORS. No se incluyen valores sensibles en el repositorio, solo se indica que debe existir una variable llamada CORS_ORIGINS con el dominio del frontend.
+El backend usa FastAPI y expone rutas para obtener clientes con categorias, metricas y detalles individuales. Se debe crear un archivo .env con un origen permitido para CORS. No se incluyen valores sensibles en el repositorio,  debe existir una variable llamada CORS_ORIGINS con el dominio del frontend y una variable llamada GROQ_API_KEY con una llave de la api de groc valida.
 
 ### Para ejecutarlo localmente:
 
@@ -115,11 +115,9 @@ Crear y activar un entorno virtual de Python.
 
 Instalar dependencias con python packages.py.
 
-Crear el archivo .env con CORS_ORIGINS=.
+Crear el archivo .env con CORS_ORIGINS= y GROQ_API_KEY=.
 
 Ejecutar uvicorn vambe_backend.main:app --reload --app-dir ..
-
-El backend requiere que el archivo JSON de categorias exista dentro de la carpeta data antes de iniciar.
 
 ## Frontend
 Es una aplicacion en React creada con Vite. Tiene varias vistas:
@@ -154,9 +152,6 @@ Correr npm run dev.
 - separacion clara de responsabilidades backend-frontend
 - carga de configuraciones mediante variables de entorno
 - estructura limpia de carpetas
-- tablas con filas clickeables para explorar clientes filtrados
-- filtros combinados en la vista de clientes
-- grafico d3 para visualizar calidad por canal
 
 ## Deploy
 
