@@ -63,7 +63,7 @@ export default function LandingPage() {
             </div>
             <div>
               <span>Top industrias</span>
-              <strong>Finanzas · Retail · Salud</strong>
+              <strong>Deducelo con bases</strong>
             </div>
             <div>
               <span>Comparativa</span>
