@@ -1,4 +1,3 @@
-// src/pages/UploadCsvPage.jsx
 import { useState } from "react";
 import "../styles/page-base.css";
 import "./UploadCsvPage.css";
